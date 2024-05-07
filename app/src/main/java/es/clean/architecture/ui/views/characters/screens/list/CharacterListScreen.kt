@@ -138,7 +138,6 @@ fun CharactersListScreen(
             }
         }
 
-
         is LoadState.Error -> {
             LottieErrorState()
         }
