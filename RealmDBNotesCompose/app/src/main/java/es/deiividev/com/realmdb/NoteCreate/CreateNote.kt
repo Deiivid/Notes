@@ -15,6 +15,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -99,7 +100,7 @@ fun CreateNoteScreen(
             ) {
                 Column(
                     modifier = Modifier
-                        .padding(12.dp)
+                        .padding(12.dp, top= 150.dp)
                         .fillMaxSize()
                 ) {
                     if (currentPhotos.value.isNotEmpty()) {
@@ -154,7 +155,25 @@ fun CreateNoteScreen(
             }
         }
     }
-
+    @Composable
+    fun GenericAppBar(title: String, onIconClick: () -> Unit, icon: @Composable () -> Unit, iconState: MutableState<Boolean>) {
+        TopAppBar(
+            title = {
+                Text(
+                    text = title,
+                    modifier = Modifier.padding(start = 8.dp)  // Agrega padding al inicio para separarlo de los íconos
+                )
+            },
+            navigationIcon = {
+                // Si necesitas un ícono de navegación, puedes agregarlo aquí
+            },
+            actions = {
+                icon()  // Aquí pones tu ícono, ya sea de guardado o menú
+                // Si tienes más íconos o acciones, añádelos aquí
+            },
+            modifier = Modifier.height(68.dp)  // Puedes ajustar la altura aquí si es necesario
+        )
+    }
 
 }
 

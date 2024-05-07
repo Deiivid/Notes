@@ -17,6 +17,7 @@ import es.deiividev.com.realmdb.NoteDetail.NoteDetailPage
 import es.deiividev.com.realmdb.NoteEdit.NoteEditScreen
 
 import es.deiividev.com.realmdb.NoteList.NoteListScreen
+import es.deiividev.com.realmdb.data.db.RealmDBNotes
 import es.deiividev.com.realmdb.ui.theme.RealmDBNotesComposeTheme
 
 
@@ -26,8 +27,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel =
-            NoteViewModelFactory(RealmDBNotesComposeApplication.getDao()).create(NotesViewModel::class.java)
+        // Acceder a la instancia de Realm desde la aplicación
+        val realm = (application as RealmDBNotesComposeApplication).realm
+        val dao = RealmDBNotes(realm)  // Crear una instancia de DAO pasando la instancia de Realm
+        val factory = NoteViewModelFactory(dao)  // Usar una fábrica que toma el DAO como dependencia
+        viewModel = factory.create(NotesViewModel::class.java)  // Crear el viewModel con la fábrica
+
         setContent {
             val navController = rememberNavController()
 
@@ -35,59 +40,37 @@ class MainActivity : ComponentActivity() {
                 navController = navController,
                 startDestination = Constants.NAVIGATION_NOTES_LIST
             ) {
-                // Notes List
                 composable(Constants.NAVIGATION_NOTES_LIST) {
-                    NoteListScreen(
-                        navController = navController,
-                        viewModel = viewModel
-                    )
+                    NoteListScreen(navController, viewModel)
                 }
-
-                // note detail page
                 composable(
                     Constants.NAVIGATION_NOTES_DETAIL,
                     arguments = listOf(navArgument(Constants.NAVIGATION_NOTES_ID_ARGUMENT) {
                         type = NavType.StringType
                     })
                 ) { navBackStackEntry ->
-                    navBackStackEntry.arguments?.getString(Constants.NAVIGATION_NOTES_ID_ARGUMENT)
-                        ?.let {
-                            NoteDetailPage(
-                                noteId = it,
-                                navController = navController,
-                                viewModel = viewModel
-                            )
-                        }
+                    navBackStackEntry.arguments?.getString(Constants.NAVIGATION_NOTES_ID_ARGUMENT)?.let {
+                        NoteDetailPage(it, navController, viewModel)
+                    }
                 }
-
-                // note edit page
                 composable(
                     Constants.NAVIGATION_NOTES_EDIT,
                     arguments = listOf(navArgument(Constants.NAVIGATION_NOTES_ID_ARGUMENT) {
                         type = NavType.StringType
                     })
                 ) { navBackStackEntry ->
-                    navBackStackEntry.arguments?.getString(Constants.NAVIGATION_NOTES_ID_ARGUMENT)
-                        ?.let {
-                            NoteEditScreen(
-                                noteId = it,
-                                navController = navController,
-                                viewModel = viewModel
-                            )
-                        }
+                    navBackStackEntry.arguments?.getString(Constants.NAVIGATION_NOTES_ID_ARGUMENT)?.let {
+                        NoteEditScreen(it, navController, viewModel)
+                    }
                 }
-
-                // note create page
                 composable(Constants.NAVIGATION_NOTES_CREATE) {
-                    CreateNoteScreen(navController = navController, viewModel = viewModel)
+                    CreateNoteScreen(navController, viewModel)
                 }
             }
         }
-
-
     }
-
 }
+
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
