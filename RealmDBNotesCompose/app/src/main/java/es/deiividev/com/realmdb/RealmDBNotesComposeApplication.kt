@@ -9,38 +9,27 @@ import es.deiividev.com.realmdb.model.NoteData
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 
-
 class RealmDBNotesComposeApplication : Application() {
-    private var db: Realm? = null  // Cambia la variable para almacenar una instancia de Realm, no de RealmConfiguration
-
-    init {
-        instance = this
-    }
+    lateinit var realm: Realm  // La instancia de Realm es pública
 
     override fun onCreate() {
         super.onCreate()
-        // No hay necesidad de llamar a Realm.init, Realm.open ya lo maneja internamente
+        val config = RealmConfiguration.Builder(schema = setOf(NoteData::class))
+            .schemaVersion(1)
+            .build()
+        realm = Realm.open(config)  // Abre la base de datos de Realm
     }
-
-    private fun getDb(): Realm {
-        if (db == null) {
-            val config = RealmConfiguration.Builder(schema = setOf(NoteData::class))  // Asegúrate de añadir todos tus modelos Realm
-                .schemaVersion(1)
-                .build()
-            db = Realm.open(config)  // Abre y guarda la instancia de Realm con la configuración
-        }
-        return db!!
-    }
-
     companion object {
-        private var instance: RealmDBNotesComposeApplication? = null
+        lateinit var instance: RealmDBNotesComposeApplication
+            private set
 
         fun getDao(): NotesDao {
-            return RealmDBNotes(instance!!.getDb())  // Asegúrate de que RealmDBNotes puede aceptar Realm como parámetro
+            // Retorna la implementación de Dao usando la instancia de Realm configurada
+            return RealmDBNotes(instance.realm ?: throw IllegalStateException("Realm Database not initialized"))
         }
 
         fun getUriPermission(uri: Uri) {
-            instance!!.applicationContext.contentResolver.takePersistableUriPermission(
+            instance.applicationContext.contentResolver.takePersistableUriPermission(
                 uri,
                 Intent.FLAG_GRANT_READ_URI_PERMISSION
             )

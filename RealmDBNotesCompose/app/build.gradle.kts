@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
-    id("io.realm.kotlin") version "1.16.0"
+    id ("io.realm.kotlin") version "1.16.0" apply true
 
 }
 
